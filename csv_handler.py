@@ -1,30 +1,30 @@
-# CSV Filter Script Tag: VM_CSV_FILTER
-
 import csv
 
-def filter_vms_by_owner(filename, partial_owner):
-    """
-    Filter VM entries by partial owner name.
-    
-    Parameters:
-    - filename: Path to the CSV file.
-    - partial_owner: The partial owner name to search for.
-    
-    Returns:
-    A list of dictionaries, each representing a row from the CSV where the partial owner name matches.
-    """
-    matching_rows = []
-    partial_owner_lower = partial_owner.lower()
-
-    with open(filename, mode='r', newline='') as file:
-        reader = csv.DictReader(file)
+# Function to search for VMs by a list of partial owner names
+def search_vms_by_owner(partial_owners, filename='vms.csv'):
+    matching_rows = []  # Initialize empty list to hold matching rows
+    with open(filename, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
         for row in reader:
-            if partial_owner_lower in row['VMOwner'].lower() or partial_owner_lower in row['SuspectedOwner'].lower():
-                matching_rows.append(row)
+            vm_owner = row['VMOwner'].lower()
+            suspected_owner = row['SuspectedOwner'].lower()
+            # Check each partial owner against current row
+            for owner in partial_owners:
+                # Corrected: Check if the current owner is in either VMOwner or SuspectedOwner
+                if owner.lower() in vm_owner or owner.lower() in suspected_owner:
+                    matching_rows.append(row)
+                    break  # Avoid adding the same row multiple times for different owner matches
 
     return matching_rows
 
-# Example Usage:
-# matching_rows = filter_vms_by_owner('path_to_your_csv_file.csv', 'partial_owner_string')
-# for row in matching_rows:
-#     print(row)
+# Example usage
+if __name__ == "__main__":
+    partial_owners = ["test01", "test02"]  # Example partial owner names
+    matches = search_vms_by_owner(partial_owners)
+    
+    if matches:
+        print("Found matching rows:")
+        for match in matches:
+            print(match)
+    else:
+        print("No matches found.")
